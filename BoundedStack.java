@@ -1,5 +1,7 @@
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.List;  
+
 
 /**
  * ToDoList - ADT แทนรายการสิ่งที่ต้องทำ
@@ -164,7 +166,16 @@ public class BoundedStack {
      * @return ToDoList ที่เรียงแล้ว
      */
     public BoundedStack sortAlphabetically() {
-        return null;
+         BoundedStack result = new BoundedStack(tasks.size());
+        
+            List<String> copy = new ArrayList<>(tasks);
+            Collections.sort(copy);
+        
+            for (String task : copy) {
+                result.addTask(task);
+            }
+        
+            return result;
     }
 
 }
