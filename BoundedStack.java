@@ -33,7 +33,13 @@ public class BoundedStack {
         if (tasks.size() > MAX_TASKS) {
             throw new IllegalStateException("จำนวนรายการต้องไม่เกิน " + MAX_TASKS); 
         }
+        for (String task : tasks) {
+            if (task == null || task.trim().isEmpty()) {
+                throw new IllegalStateException("รายการใน tasks ต้องไม่เป็น null หรือว่าง");
+            }
+        }
     }
+    
 
     // ===== Creator =====
 
@@ -42,6 +48,7 @@ public class BoundedStack {
      */
     public BoundedStack() {
         this.tasks = new ArrayList<>(MAX_TASKS);
+        checkRep();
     }
 
     /**
@@ -71,6 +78,10 @@ public class BoundedStack {
     public boolean addTask(String task) {
         if (task == null || task.trim().isEmpty()) {
             throw new IllegalArgumentException("task ต้องไม่เป็น null หรือว่าง");
+        }
+        // ตรวจสอบว่ารายการเต็มหรือไม่ 
+        if (tasks.size() >= MAX_TASKS) {
+            return false;
         }
         tasks.add(task);
         checkRep();
@@ -102,7 +113,7 @@ public class BoundedStack {
      */
     public boolean updateTask(int index, String newTask) {
         if (index < 0 || index >= tasks.size()) {
-            return false;
+            throw new IndexOutOfBoundsException("Index ไม่ถูกต้อง: " + index);
         }
         if (newTask == null || newTask.trim().isEmpty()) {
             throw new IllegalArgumentException("newTask ต้องไม่เป็น null หรือว่าง");
@@ -122,7 +133,7 @@ public class BoundedStack {
      */
     public String getTask(int index) {
         if (index < 0 || index >= tasks.size()) {
-            return "";
+           throw new IndexOutOfBoundsException("Invalid index: " + index);
         }
         return tasks.get(index);
     }
