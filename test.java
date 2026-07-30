@@ -28,7 +28,7 @@ public class test {
                     + " - re-run with: java -ea test\n");
         }
 
-        System.out.println("=== BoundedStack Test Suite ===\n");
+        System.out.println("=== Todolist Test Suite ===\n");
 
         testCreators();
         testAdd();
@@ -54,7 +54,7 @@ public class test {
 
         check("new() -> empty", new BoundedStack().getAllTasks().isEmpty());
 
-        // boundary ลองขอบสุด ๆ ดู initial = 0 กับ initial = max_number ต้องไม่ error
+        // boundary ลองขอบสุด ๆ ดู initial = 0 กับ initial = MAX_TASKS ต้องไม่ error
         check("new(0) -> empty", new BoundedStack(0).getAllTasks().isEmpty());
         boolean threwAtUpperBound = false;
         try {
@@ -62,7 +62,7 @@ public class test {
         } catch (IllegalArgumentException e) {
             threwAtUpperBound = true;
         }
-        check("new(max_tasks) -> does not throw", !threwAtUpperBound);
+        check("new(MAX_TASKS) -> does not throw", !threwAtUpperBound);
 
         // partition: input ผิดเงื่อนไข ใส่ค่าผิด ๆ ไป มันต้อง throw exception ออกมา
         boolean threwNegative = false;
@@ -82,32 +82,22 @@ public class test {
         check("new(MAX_TASKS + 1) -> throws IllegalArgumentException", threwOverMax);
     }
 
-    // Mutator เทส add() ว่าเก็บลำดับถูกไหม แล้วกันคะแนนแปลก ๆ ได้จริงไหม
+    // Mutator เทส addTasks() ว่าเก็บลำดับถูกไหม แล้วกันข้อความแปลก ๆ ได้จริงไหม
     private static void testAdd() {
         System.out.println("\n-- Add --");
 
         BoundedStack s = new BoundedStack();
-        check("add(20) -> returns true", s.addTask("20"));
-        check("add(20) -> found by contains", s.contains("20"));
+        check("add(ทำการบ้าน) -> returns true", s.addTask("ทำการบ้าน"));
+        check("add(ทำการบ้าน) -> found by contains", s.contains("ทำการบ้าน"));
 
-        s.addTask("9");
-        s.addTask("15");
+        s.addTask("อ่านหนังสือ");
+        s.addTask("ซื้อของ");
         check("add preserves insertion order",
-                s.getAllTasks().equals(Arrays.asList("20", "9", "15")));
+                s.getAllTasks().equals(Arrays.asList("ทำการบ้าน","อ่านหนังสือ","ซื้อของ")));
 
-        // partition: ค่าซ้ำ เพิ่มคะแนนซ้ำได้นะ ไม่ใช่ set ที่ห้ามซ้ำ
-        s.addTask("9");
-        check("duplicate scores both counted", s.getAllTasks().size() == 4);
-
-        // boundary ลองขอบ ๆ ดู 0 ต้องผ่าน แต่ 21 ต้องไม่ผ่าน เพราะคะแนนเต็มคือ 20
-        check("add(0) -> lower bound accepted", new BoundedStack().addTask("0"));
-        boolean threwOver20 = false;
-        try {
-            s.addTask("21");
-        } catch (IllegalArgumentException e) {
-            threwOver20 = true;
-        }
-        check("add(\"21\") -> throws IllegalArgumentException", threwOver20);
+        // partition: เพิ่ม Task ซ้ำได้
+        s.addTask("อ่านหนังสือ"); 
+        check("duplicate tasks are allowed", s.getAllTasks().size() == 4);
 
         // partition: input ผิดเงื่อนไข ลองใส่ค่าผิด ๆ แบบต่าง ๆ ดูว่า error ถูกไหม
         boolean threwNull = false;
@@ -126,13 +116,12 @@ public class test {
         }
         check("add(empty string) -> throws IllegalArgumentException", threwEmpty);
 
-        boolean threwNonDigit = false;
-        try {
-            s.addTask("abc");
-        } catch (IllegalArgumentException e) {
-            threwNonDigit = true;
-        }
-        check("add(\"abc\") -> throws IllegalArgumentException", threwNonDigit);
+        boolean threwBlank = false; 
+        try { 
+            s.addTask(" "); } 
+        catch (IllegalArgumentException e) {
+            threwBlank = true; 
+        } check("add(blank string) -> throws IllegalArgumentException", threwBlank);
 
         
     }
@@ -142,15 +131,15 @@ public class test {
         System.out.println("\n-- Remove --");
 
         BoundedStack s = new BoundedStack();
-        s.addTask("20");
-        s.addTask("9");
-        s.addTask("15");
+        s.addTask("ทำการบ้าน"); 
+        s.addTask("อ่านหนังสือ"); 
+        s.addTask("ซื้อของ");
 
         check("remove(1) -> returns true", s.removeTask(1));
         check("remove keeps the others in order",
-                s.getAllTasks().equals(Arrays.asList("20", "15")));
+                s.getAllTasks().equals(Arrays.asList("ทำการบ้าน", "ซื้อของ")));
 
-        // boundary ลบ index ที่ไม่มีจริง (เกินขอบบน กับ ติดลบ) ไม่ error แค่คืน false
+        // boundary ลบรายการที่ไม่มีอยู่ (เกินขอบบน กับ ติดลบ) ไม่ error แค่คืน false
         check("remove(index เกินขอบบน) -> returns false", !s.removeTask(99));
         check("remove(index ติดลบ) -> returns false", !s.removeTask(-1));
 
@@ -160,18 +149,19 @@ public class test {
         check("remove all -> empty", s.getAllTasks().isEmpty());
     }
 
-    // Observer เทสพวก get, contains, getAll ว่าดูค่าอย่างเดียว ไม่ไปแก้ข้อมูล (no side effect)
+    // Observer เทสพวก getTask, contains, getAllTasks ว่าดูค่าอย่างเดียว ไม่ไปแก้ข้อมูล (no side effect)
     private static void testObservers() {
         System.out.println("\n-- Observers --");
 
         BoundedStack s = new BoundedStack();
-        s.addTask("20");
-        s.addTask("9");
+        s.addTask("ทำการบ้าน"); 
+        s.addTask("อ่านหนังสือ");
 
-        check("get(0)/get(1) return scores in order",
-                s.getTask(0).equals("20") && s.getTask(1).equals("9"));
-        check("contains finds an existing score", s.contains("20"));
-        check("contains rejects a missing score", !s.contains("99"));
+        check("getTask(0)/getTask(1) return tasks in order",
+        s.getTask(0).equals("ทำการบ้าน") &&
+        s.getTask(1).equals("อ่านหนังสือ"));
+        check("contains finds an existing task",s.contains("ทำการบ้าน"));
+        check("contains rejects a missing task",!s.contains("ไปเที่ยว"));
 
         boolean threwOutOfBounds = false;
         try {
@@ -183,27 +173,26 @@ public class test {
 
         int before = s.getAllTasks().size();
         s.getAllTasks();
-        s.contains("20");
+        s.contains("ทำการบ้าน");
         check("observers have no side effects", s.getAllTasks().size() == before);
     }
 
-    // Producer เทส sortedDescending() ว่าคืนตัวใหม่จริง ไม่แก้ตัวเดิม
+    // Producer เทส sortAlphabetically() ว่าคืนตัวใหม่จริง ไม่แก้ตัวเดิม
     private static void testProducer() {
-        System.out.println("\n-- Producer (sortedDescending) --");
-
+        System.out.println("\n-- Producer (sortAlphabetically) --");
         BoundedStack original = new BoundedStack();
-        original.addTask("9");
-        original.addTask("20");
-        original.addTask("15");
+        original.addTask("homework"); 
+        original.addTask("book"); 
+        original.addTask("shopping");
 
         BoundedStack sorted = original.sortAlphabetically();
-        check("sortedDescending is ordered from มากไปน้อย",
-                sorted.getAllTasks().equals(Arrays.asList("20", "15", "9")));
-        check("sortedDescending does not mutate the original",
-                original.getAllTasks().equals(Arrays.asList("9", "20", "15")));
+        check("sortAlphabetically orders tasks alphabetically",
+            sorted.getAllTasks().equals( Arrays.asList("book", "homework", "shopping") ));
+        check("sortAlphabetically does not mutate the original", 
+        original.getAllTasks().equals( Arrays.asList("homework", "book", "shopping") ));
 
         // boundary ลอง sort ตอน list ว่าง ๆ ดู ต้องไม่พัง
-        check("sorting an empty stack is safe",
+        check("sorting an empty todo list is safe",
                 new BoundedStack().sortAlphabetically().getAllTasks().isEmpty());
     }
 
@@ -212,13 +201,13 @@ public class test {
         System.out.println("\n-- Representation Exposure --");
 
         BoundedStack s = new BoundedStack();
-        s.addTask("20");
+        s.addTask("ทำการบ้าน");
 
         List<String> got = s.getAllTasks();
-        got.add("99");
-        check("mutating the result of getAll() does not affect the stack",
-                s.getAllTasks().size() == 1 && !s.contains("99"));
+        got.add("Hack");
+        check("mutating the result of getAllTasks() does not affect the todo list", 
+            s.getAllTasks().size() == 1 && !s.contains("Hack"));
 
-        check("getAll() returns a fresh list each call", s.getAllTasks() != s.getAllTasks());
+        check("getAllTasks() returns a fresh list each call", s.getAllTasks() != s.getAllTasks());
     }
 }
