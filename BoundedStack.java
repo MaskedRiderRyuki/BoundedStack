@@ -1,5 +1,7 @@
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.List;  
+
 
 /**
  * ToDoList - ADT แทนรายการสิ่งที่ต้องทำ
@@ -25,7 +27,12 @@ public class BoundedStack {
     // - รายการแต่ละรายการต้องไม่เป็นช่องว่างล้วน
 
     private void checkRep() {
-        // เขียนเอง
+        if (tasks == null) {
+            throw new IllegalStateException("tasks ต้องไม่เป็น null");
+        }
+        if (tasks.size() > MAX_TASKS) {
+            throw new IllegalStateException("จำนวนรายการต้องไม่เกิน " + MAX_TASKS); 
+        }
     }
 
     // ===== Creator =====
@@ -62,6 +69,11 @@ public class BoundedStack {
      * @throws IllegalArgumentException ถ้า task ไม่ถูกต้อง
      */
     public boolean addTask(String task) {
+        if (task == null || task.trim().isEmpty()) {
+            throw new IllegalArgumentException("task ต้องไม่เป็น null หรือว่าง");
+        }
+        tasks.add(task);
+        checkRep();
         return true;
     }
 
@@ -73,7 +85,12 @@ public class BoundedStack {
      *         false ถ้าตำแหน่งไม่ถูกต้อง
      */
     public boolean removeTask(int index) {
-        return false;
+        if (index < 0 || index >= tasks.size()) {
+            return false;
+        }
+        tasks.remove(index);
+        checkRep();
+        return true;
     }
 
     /**
@@ -84,7 +101,15 @@ public class BoundedStack {
      * @return true ถ้าแก้ไขสำเร็จ
      */
     public boolean updateTask(int index, String newTask) {
-        return false;
+        if (index < 0 || index >= tasks.size()) {
+            return false;
+        }
+        if (newTask == null || newTask.trim().isEmpty()) {
+            throw new IllegalArgumentException("newTask ต้องไม่เป็น null หรือว่าง");
+        }
+        tasks.set(index, newTask);
+        checkRep();
+        return true;
     }
 
     // ===== Observers =====
@@ -96,7 +121,10 @@ public class BoundedStack {
      * @return รายการที่ตำแหน่งนั้น
      */
     public String getTask(int index) {
-        return "";
+        if (index < 0 || index >= tasks.size()) {
+            return "";
+        }
+        return tasks.get(index);
     }
 
     /**
@@ -106,6 +134,9 @@ public class BoundedStack {
      * @return true ถ้าพบ
      */
     public boolean contains(String task) {
+        if (task == null || task.trim().isEmpty()) {
+            throw new IllegalArgumentException("task ต้องไม่เป็น null หรือว่าง");
+        }
         return tasks.contains(task);
     }
 
@@ -115,7 +146,7 @@ public class BoundedStack {
      * @return จำนวนรายการ
      */
     public int size() {
-        return tasks.size();
+         return tasks.size();
     }
 
     /**
@@ -135,7 +166,16 @@ public class BoundedStack {
      * @return ToDoList ที่เรียงแล้ว
      */
     public BoundedStack sortAlphabetically() {
-        return null;
+         BoundedStack result = new BoundedStack(tasks.size());
+        
+            List<String> copy = new ArrayList<>(tasks);
+            Collections.sort(copy);
+        
+            for (String task : copy) {
+                result.addTask(task);
+            }
+        
+            return result;
     }
 
 }
