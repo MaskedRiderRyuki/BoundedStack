@@ -40,6 +40,7 @@ public class BoundedStack {
      */
     public BoundedStack() {
         this.tasks = new ArrayList<>(MAX_TASKS);
+        checkRep();
     }
 
     /**
